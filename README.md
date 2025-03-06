@@ -14,13 +14,16 @@ I have dedicated the majority of my research to the development of the [MiniZinc
 
 For more information about me and my research, you can visit [dekker.one][1].
 
+**NOTICE:** I have moved my non-collaborative projects to [git.dekker.one][5]. 
+
 ## 📬 Get in touch
 
 - Web: [dekker.one][1]
-- Fediverse: [@Dekker1@hachyderm.io][3]
-- Twitter (not very active): [twitter.com/DekkerOne][4]
+- Bluesky: [@dekker.one][4]
+- Fediverse (not active): [@Dekker1@hachyderm.io][3]
 
 [1]: https://dekker.one
 [2]: https://www.minizinc.org
 [3]: https://hachyderm.io/@Dekker1
-[4]: https://twitter.com/DekkerOne
+[4]: https://bsky.app/profile/dekker.one
+[5]: https://git.dekker.one/Dekker1
