@@ -14,7 +14,7 @@ I have dedicated the majority of my research to the development of the [MiniZinc
 
 For more information about me and my research, you can visit [dekker.one][1].
 
-**NOTICE:** I have moved my non-collaborative projects to [git.dekker.one][5]. 
+**NOTICE:** I have moved my non-collaborative projects to [tangled.sh][5]. 
 
 ## 📬 Get in touch
 
@@ -26,4 +26,4 @@ For more information about me and my research, you can visit [dekker.one][1].
 [2]: https://www.minizinc.org
 [3]: https://hachyderm.io/@Dekker1
 [4]: https://bsky.app/profile/dekker.one
-[5]: https://git.dekker.one/Dekker1
+[5]: https://tangled.sh/@dekker.one
