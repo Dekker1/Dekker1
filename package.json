@@ -1,0 +1,43 @@
+{
+  "name": "dekker.one",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier -w ."
+  },
+  "browserslist": "defaults, not ie <= 11",
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@mapbox/rehype-prism": "^0.9.0",
+    "@mdx-js/loader": "^3.0.0",
+    "@mdx-js/react": "^3.0.0",
+    "@next/mdx": "^14.0.3",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.39",
+    "@types/react-dom": "^18.2.17",
+    "@types/webpack-env": "^1.18.4",
+    "autoprefixer": "^10.4.16",
+    "clsx": "^2.0.0",
+    "fast-glob": "^3.3.2",
+    "feed": "^4.2.2",
+    "next": "^14.0.3",
+    "next-themes": "^0.2.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "remark-gfm": "^4.0.0",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-config-next": "^14.0.3",
+    "prettier": "^3.1.0",
+    "prettier-plugin-tailwindcss": "^0.5.7",
+    "sharp": "^0.32.6"
+  }
+}

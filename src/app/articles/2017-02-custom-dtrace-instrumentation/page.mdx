@@ -1,0 +1,197 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const dynamic = 'force-static'
+export const article = {
+  author: 'Jip J. Dekker',
+  date: '2017-02-24',
+  title: 'Implementing custom DTrace instrumentation',
+  description:
+    'DTrace (and SystemTap) are often the “go to” when adding tracing in high performance environments such as for example operating systems. This note discusses adding instrumentation to your own application, so you can take advantage of these powerful tools.',
+}
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+Last semester I had a chance to work with DTrace. In particular, I implemented
+custom DTrace instrumentation in Encore and [Pony](http://www.ponylang.org/).
+Encore is a new programming language which extends Pony. The language is being
+developed at Uppsala University. In this blog I will explain why you want to use
+DTrace, how we use it, and how to add it to your application.
+
+## What is DTrace?
+
+DTrace stands for **dynamic trace**. Have you even had to go through your code
+and add print-statements to gather statistics or debug? That is exactly what
+DTrace tries to avoid! When an application uses DTrace, it has **instrumentation
+points**. These are the points where you would gather or print data. Each
+instrumentation point can contain some arguments. This will be the data
+available at this instrumentation point. A big advantage of these
+instrumentation points is that you do not have to remove them. This is because
+it is dynamic; when an instrumentation point is not in use, the program will
+skip over it.
+
+If you are on a Mac, then many of the programs you are using already have
+instrumentation points. DTrace was part of the Solaris operating system and
+adopted into most BSD versions. Normal users can use the instrumentation points
+implemented in existing programs. Various guides to exploring these
+instrumentation points already exist. If you are on a Mac, then you could take a
+look
+[here](http://www.mactech.com/articles/mactech/Vol.23/23.11/ExploringLeopardwithDTrace/index.html).
+FreeBSD offers its own guide, which you will find
+[here](https://wiki.freebsd.org/DTrace/Tutorial).
+
+### Sidenote: Linux — SystemTap
+
+_Because of licensing troubles, DTrace is not the standard in Linux operating
+systems. There are DTrace versions available, but you'll have to install them
+into the kernel. An alternative is at hand though: SystemTap. SystemTap works
+like DTrace, but there are a few key differences. In general, you can use the
+same instrumentation points, but not the same scripts. To read more about
+SystemTap visit their [website](https://sourceware.org/systemtap/index.html)._
+
+## Writing DTrace scripts
+
+In more serious use cases one-line DTrace instructions won't be enough. DTrace
+offers a simple scripting interface. Using a few statements you can extract the
+information you need. Within DTrace scripts we refer to instrumentation points
+as **probes**. Every script contains statements in the following form:
+
+```
+probe description
+/ predicate /
+{
+   action statements
+}
+```
+
+The probe descriptor is the defined name for the probe. The action statements
+contain the actions executed when a probe activates. Finally, a predicate
+describes a condition that has to hold for the actions to take place.
+
+It is sometimes hard to find DTrace documentation. The [Dynamic Tracing
+Guide](http://dtrace.org/guide/preface.html) is usually a great place to start.
+It contains information on almost anything you might come across while writing
+scripts. The documentation on the various types can be very helpful. Although
+the guide refers to the Illumos operating system, it is the same on other
+systems.
+
+Although the statements are simple, they can gather important information. Take
+for example the following
+[script](https://github.com/ponylang/ponyc/blob/master/examples/dtrace/gc.d):
+
+```
+pony$target:::gc-start
+{
+  @count["GC Passes"] = count();
+  self->start_gc = timestamp;
+}
+
+pony$target:::gc-end
+{
+  @quant["Time in GC (ns)"] = quantize(timestamp - self->start_gc);
+  @times["Total time"] = sum(timestamp - self->start_gc);
+}
+
+END
+{
+  printa(@count);
+  printa(@quant);
+  printa(@times);
+}
+```
+
+This script analyses the garbage collection in the Pony runtime. It will show
+you how many times garbage collection ran, how much time it took, and how the
+time was distributed. This is very important information when analysing the
+performance of the garbage collector. The following image shows the output of an
+example run of the DTrace script:
+
+```
+GC Passes                                                7
+
+Time in GC (ns)
+         value ---------- Distribution ---------- count
+         1024 |                                   0
+         2048 |@@@@@@@@@@@                        2
+         4096 |@@@@@@@@@@@                        2
+         8192 |@@@@@@@@@@@                        2
+        16384 |@@@@@@                             1
+        32768 |                                   0
+
+Total time                                           56721
+```
+
+DTrace script are usually saved with a `.d` file type. To run a DTrace script
+you use `dtrace -s [script].d`. If you want to limit the results to an
+executable, then you can add `-c [executable]`. This executable will then be
+start with the script running.
+
+### Tip: Shebang
+
+_If you include `#!/usr/bin/env dtrace -s` on the first line in your file, then
+you don't have to type `dtrace -s` every time. If your script is executable,
+then you can run `./[script].d`. You can append any DTrace flags you deem
+necessary._
+
+## Adding your own probes
+
+If you are writing a program in C, you have the option of adding your own
+probes. The process is simple:
+
+1. You define your probes.
+2. You generate C macros for the probes.
+3. You place the macros within the C code.
+
+Take a look at [this
+guide](https://www.ibm.com/developerworks/aix/library/au-dtraceprobes.html) for
+an in-detail walkthrough. It will show you the syntax for defining your own
+probes and how to compile your code. Note that there are differences in the
+compilation process for DTrace and SystemTap. Take these into account in your
+Makefile.
+
+The names of the macros that DTrace generates leave something to be desired.
+Their worst quality is that they can be ambiguous. For example, the probe
+`gc-start`, in Pony, will generate the macro `PONY_GC_START`. This name suggests
+that the macro would start the garbage collection. In a large code base the
+macros can also be hard to find. To improve on this, you can add a macro
+framework. Pony has its macro framework
+[here](https://github.com/ponylang/ponyc/blob/master/src/common/dtrace.h). This
+will let you call the macro like this: `DTRACE1(GC_START, ...);`.
+
+### Sidenote: macOS — System Integrity Protection
+
+_In newer versions of macOS not all features of DTrace are available to all
+users. **System Integrity Protection** blocks some features. This includes the
+use of custom probes. To use them, you need to partially disable System
+Integrity Protection. [This
+blog](http://internals.exposed/blog/dtrace-vs-sip.html) describes the problem
+and how to solve it._
+
+## A glimpse of Pony
+
+It might be helpful to take a look at a working implementation. Encore is
+currently not open source, but Pony is! You can find the Pony repository
+[here](https://github.com/ponylang/ponyc). The following items you might find
+useful:
+
+- [The probe definitions](https://github.com/ponylang/ponyc/blob/master/src/common/dtrace_probes.d)
+
+- [The macro framework](https://github.com/ponylang/ponyc/blob/master/src/common/dtrace.h)
+
+- [The documentation and example scripts](https://github.com/ponylang/ponyc/tree/master/examples/dtrace)
+
+You can find the use of the probes in the C code by searching for `DTRACE` in
+any `.c` file.
+
+## Resources
+
+- [Exploring Leopard with DTrace](http://www.mactech.com/articles/mactech/Vol.23/23.11/ExploringLeopardwithDTrace/index.html)
+- [The DTrace One-Liner Tutorial](https://wiki.freebsd.org/DTrace/Tutorial)
+- [SystemTap](https://sourceware.org/systemtap/index.html)
+- [Dynamic Tracing Guide](http://dtrace.org/guide/preface.html)
+- [Adding DTrace probes to your applications](http://www.ibm.com/developerworks/aix/library/au-dtraceprobes.html)
+- [DTrace vs. System Integrity Protection](http://internals.exposed/blog/dtrace-vs-sip.html)
+- [The Pony Repository](https://github.com/ponylang/ponyc)

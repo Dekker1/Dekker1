@@ -1,0 +1,56 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const dynamic = 'force-static'
+export const article = {
+  author: 'Jip J. Dekker',
+  date: '2022-08-15',
+  title: 'A Homebrew Tap for MiniZinc Solvers',
+  description:
+    "I'm proposing a Homebrew tap to make it easier for users to install different MiniZinc solvers. The tap already contains many of the open source solvers that are current contenders in the MiniZinc challenge, and I'm hoping to add any others that fit the infrastructure.",
+}
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+TLDR; I'm proposing a [Homebrew](https://brew.sh/) tap to make it easier for users to install different MiniZinc solvers.
+The tap already contains many of the open source solvers that are current contenders in the MiniZinc challenge, and I'm hoping to add any others that fit the infrastructure.
+I will try to keep the solvers contained in the tap up-to-date, but contributions are always welcome.
+The tap can be found in this [GitHub repository](https://github.com/Dekker1/homebrew-minizinc).
+
+---
+
+One of the strengths of the MiniZinc ecosystem is the great variety of solvers that have support for the language, each with their different strengths and weaknesses.
+Using different solvers to solve your MiniZinc solvers has improved a lot over the years (at least in my opinion).
+The process now generally consists of installing the right prerequisites, the solver itself, and putting all the MiniZinc files (the library and the solver configuration) in the right place.
+That being said, this can still be a bit of work (or at least something that is easy to do wrong).
+
+Luckily this problem is the exact problem that package managers already solve.
+Although I cannot offer a solution for all devices (let's refrain from having yet another package manager), devices using [Homebrew](https://brew.sh/) can now use my [MiniZinc solver tap](https://github.com/Dekker1/homebrew-minizinc).
+If you have Homebrew installed, then using the tap to, for example, install Yuck is as simple as running `brew install dekker1/minizinc/yuck`.
+Once the process is finished “Yuck 20210501” can be immediately used from the MiniZincIDE, or from command line running `minizinc --solver yuck <file.mzn>`.
+
+The tap can currently help to install the following solvers:
+
+- [Choco](https://choco-solver.org) — `brew install dekker1/minizinc/choco`
+- [Chuffed](https://github.com/chuffed/chuffed) — `brew install dekker1/minizinc/chuffed`
+- [flatzingo](https://github.com/potassco/flatzingo) — `brew install dekker1/minizinc/flatzingo`
+- [FindMUS](https://gitlab.com/minizinc/FindMUS) — `brew install dekker1/minizinc/findmus`
+- [Geas](https://bitbucket.org/gkgange/geas) — `brew install dekker1/minizinc/geas`
+- [JaCoP](https://github.com/radsz/jacop/) — `brew install dekker1/minizinc/jacop`
+- [FZN Picat](https://github.com/nfzhou/fzn_picat) — `brew install dekker1/minizinc/fzn-picat`
+  - Note: this tap contains only the FlatZinc interface to [Picat](http://picat-lang.org), it depends on the Picat package in Hombebrew core.
+- [Yuck](https://github.com/informarte/yuck/) — `brew install dekker1/minizinc/yuck`
+
+_A continuously updated list of the solvers included can be found in the [repository README](https://github.com/Dekker1/homebrew-minizinc)._
+
+It is my intention to keep at least these solvers up-to-date, and I will try to add other open source MiniZinc challenge contenders.
+Contributions to update solvers or add new solvers are very welcome.
+
+Finally, I understand that Homebrew might not work for everyone.
+It is limited in its supported operating systems, and some people seem to really despise it.
+If you prefer some other package manager or in the future there is a better/more inclusive alternative, then hopefully this Homebrew tap can serve as inspiration.
+
+If you have any problems, then feel free to file an [issue](https://github.com/Dekker1/homebrew-minizinc/issues).

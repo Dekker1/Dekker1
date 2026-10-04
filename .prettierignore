@@ -1,0 +1,5 @@
+# build artefacts
+.next/
+out/
+
+node_modules/
